@@ -8,7 +8,7 @@ Simple classifier to classify MNIST images, based on Keras with the Tensorflow b
 
 ### To predict images:
 To predict existing images with the pre-trained model (99.36% accuracy on the MNIST test set)
-* `python mnist_classifier.py --predict --model pweights.hdf5--img_path path-to-images`
+* `python mnist_classifier.py --predict --model weights.hdf5 --img_path path-to-images`
 
 Images should be stored in the following layout:
 * class-0
