@@ -20,7 +20,7 @@ Images should be stored in the following layout:
 ** img2.jpg
 ** ...
 * class-1
-** img1.jpg
-** img2.jpg
+**img1.jpg
+**img2.jpg
 ** ...
 * ...
