@@ -7,17 +7,13 @@ import datetime
 import dateutil.tz
 import argparse
 
-import tensorflow as tf
-import tensorflow.contrib.layers as tcl
 from tensorflow.examples.tutorials.mnist import input_data
 
 import keras
-from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D, Activation
+from keras.layers import Conv2D, MaxPooling2D
 from keras.layers.normalization import BatchNormalization
-from keras import backend as K
 from keras.layers.advanced_activations import LeakyReLU
 from keras.preprocessing import image
 
@@ -29,7 +25,7 @@ parser.add_argument("--epochs", help="Epochs to train [50]", type=int, default=5
 parser.add_argument("--learning_rate", help="Learning rate for the optimizer [0.001]", type=float, default=1e-3)
 parser.add_argument("--batch_size", help="The size of batch images [64]", type=int, default=64)
 parser.add_argument("--optimizer", help="Optimizer to use. Can be one of: SGD, RMSprop, Adadelta, Adam [Adam]",
-                    type=str, default="Adam")
+                    type=str, default="Adam", choices=set(("SGD", "RMSprop", "Adadelta", "Adam")))
 parser.add_argument("--val_size", help="The size of the validation set [5000]", type=int, default=5000)
 parser.add_argument("--log_dir", help="Directory name to save the checkpoints and logs [log_dir]",
                     type=str, default="log_dir")
@@ -75,28 +71,29 @@ def load_mnist_data(path, val_size):
 
 # build the classification model
 def build_model(optimizer, learning_rate, input_shape=(28, 28, 1)):
-    weight_init = tf.random_normal_initializer(stddev=0.02)
+    weight_init = keras.initializers.RandomNormal(mean=0.0, stddev=0.02)
+
     model = Sequential()
-    model.add(Conv2D(64, kernel_size=(4, 4), input_shape=input_shape, padding="same", strides=2,
+    model.add(Conv2D(64, kernel_size=4, input_shape=input_shape, padding="same", strides=2,
                      kernel_initializer=weight_init))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(MaxPooling2D(pool_size=2, strides=1))
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(128, kernel_size=(4, 4), padding="same", strides=2, kernel_initializer=weight_init))
+    model.add(Conv2D(128, kernel_size=4, padding="same", strides=2, kernel_initializer=weight_init))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(MaxPooling2D(pool_size=2, strides=1))
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(256, kernel_size=(4, 4), padding="same", strides=2, kernel_initializer=weight_init))
+    model.add(Conv2D(256, kernel_size=4, padding="same", strides=2, kernel_initializer=weight_init))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+    model.add(MaxPooling2D(pool_size=2, strides=1))
     model.add(Dropout(0.5))
 
-    model.add(Conv2D(256, kernel_size=(4, 4), padding="same", strides=2, kernel_initializer=weight_init))
+    model.add(Conv2D(256, kernel_size=4, padding="same", strides=2, kernel_initializer=weight_init))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
     model.add(Dropout(0.5))
@@ -156,12 +153,9 @@ def train_model():
 
 # predict image classes
 def predict(model, img_path, batch_size):
-    # helper function to normalize image pixel values into range [0,1]
-    def normalize_image(img):
-        return img * 1.0 / 255.0
-
     model = keras.models.load_model(model)
-    img_generator = image.ImageDataGenerator(preprocessing_function=normalize_image)
+    # normalize image pixel values into range [0,1]
+    img_generator = image.ImageDataGenerator(preprocessing_function=lambda img: img/255.0)
     validation_generator = img_generator.flow_from_directory(directory=img_path, target_size=(28,28), shuffle=False,
                                                              batch_size=batch_size, color_mode="grayscale",)
 
