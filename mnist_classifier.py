@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import datetime
 import dateutil.tz
+import argparse
 
 import tensorflow as tf
 import tensorflow.contrib.layers as tcl
@@ -21,19 +22,23 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.preprocessing import image
 
 
-flags = tf.app.flags
-flags.DEFINE_integer("epochs", 50, "Epochs to train [25]")
-flags.DEFINE_float("learning_rate", 0.001, "Learning rate for the optimizer [0.0002]")
-flags.DEFINE_integer("batch_size", 64, "The size of batch images [64]")
-flags.DEFINE_string("optimizer", "Adam", "Optimizer to use [Adadelta]")
-flags.DEFINE_integer("val_size", 5000, "The size of the validation set [5000]")
-flags.DEFINE_string("log_dir", "log_dir", "Directory name to save the checkpoints and logs []")
-flags.DEFINE_boolean("train", False, "True for training a new model [False]")
-flags.DEFINE_boolean("predict", False, "True for predicting with an existing model [False]")
-flags.DEFINE_string("data_set_path", "mnist_data", "Path where data set is stored. [mnist_data]")
-flags.DEFINE_string("model", "weights.hdf5", "Path to model used for prediction. []")
-flags.DEFINE_string("img_path", "", "Path to images to predict. []")
-FLAGS = flags.FLAGS
+parser = argparse.ArgumentParser()
+parser.add_argument("--train", help="True for training a new model [False]", action='store_true')
+parser.add_argument("--predict", help="True for predicting with an existing model [False]", action='store_true')
+parser.add_argument("--epochs", help="Epochs to train [50]", type=int, default=50)
+parser.add_argument("--learning_rate", help="Learning rate for the optimizer [0.001]", type=float, default=1e-3)
+parser.add_argument("--batch_size", help="The size of batch images [64]", type=int, default=64)
+parser.add_argument("--optimizer", help="Optimizer to use. Can be one of: SGD, RMSprop, Adadelta, Adam [Adam]",
+                    type=str, default="Adam")
+parser.add_argument("--val_size", help="The size of the validation set [5000]", type=int, default=5000)
+parser.add_argument("--log_dir", help="Directory name to save the checkpoints and logs [log_dir]",
+                    type=str, default="log_dir")
+parser.add_argument("--data_set_path", help="Path where data set for training is stored. [mnist_data]",
+                    type=str, default="mnist_data")
+parser.add_argument("--model", help="Path to model used for prediction. [weights.hdf5]", type=str, default="weights.hdf5")
+parser.add_argument("--img_path", help="Path to images to predict. []", type=str,)
+FLAGS = parser.parse_args()
+
 
 now = datetime.datetime.now(dateutil.tz.tzlocal())
 timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -45,8 +50,8 @@ if not os.path.exists(log_dir):
 
 # save command line arguments
 with open(log_dir + "/hyperparameters_"+timestamp+".csv", "wb") as f:
-    for arg in tf.app.flags.FLAGS.flag_values_dict():
-        f.write(arg + "," + str(tf.app.flags.FLAGS.flag_values_dict()[arg]) + "\n")
+    for arg in FLAGS.__dict__:
+        f.write(arg + "," + str(FLAGS.__dict__[arg]) + "\n")
 
 
 # use mnist data from the specified folder (download if not already there)
@@ -170,3 +175,4 @@ elif FLAGS.predict:
     predict(FLAGS.model, FLAGS.img_path, FLAGS.batch_size)
 else:
     print("No valid option chosen. Choose either \"--train\" or \"--predict\".")
+    print("Use \"--help\" for an overview of the command line arguments.")
