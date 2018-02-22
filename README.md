@@ -14,13 +14,14 @@ To view training statistics:
 
 To predict images:
 * `python mnist_classifier.py --predict --model path-to-model --img_path path-to-images`
+
 Images should be stored in the following layout:
 * class-0
 ** img1.jpg
 ** img2.jpg
 ** ...
 * class-1
-⋅⋅* img1.jpg
+⋅⋅** img1.jpg
  ** img2.jpg
 ** ...
 * ...
