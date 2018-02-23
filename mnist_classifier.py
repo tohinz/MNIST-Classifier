@@ -11,10 +11,8 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, LeakyReLU
 from keras.layers.normalization import BatchNormalization
-from keras.layers.advanced_activations import LeakyReLU
 from keras.preprocessing import image
 
 
@@ -108,8 +106,7 @@ def build_model(optimizer, learning_rate, input_shape=(28, 28, 1)):
 
     lr = learning_rate
     optimizers = {"SGD": keras.optimizers.SGD(lr=lr), "RMSprop": keras.optimizers.RMSprop(lr=lr),
-                  "Adadelta": keras.optimizers.Adadelta(lr=lr), "Adam": keras.optimizers.Adam(lr=lr)
-                  }
+                  "Adadelta": keras.optimizers.Adadelta(lr=lr), "Adam": keras.optimizers.Adam(lr=lr)}
 
     model.compile(loss=keras.losses.categorical_crossentropy,
                   optimizer=optimizers[optimizer],
@@ -166,6 +163,9 @@ def predict(model, img_path, batch_size):
 if FLAGS.train:
     train_model()
 elif FLAGS.predict:
+    assert FLAGS.img_path is not None, "Please specify the directory in which the images are stored via \"--img_path\"."
+    assert os.path.exists(FLAGS.img_path), "The specified path to the images does not exit: {}". \
+        format(FLAGS.img_path)
     predict(FLAGS.model, FLAGS.img_path, FLAGS.batch_size)
 else:
     print("No valid option chosen. Choose either \"--train\" or \"--predict\".")
