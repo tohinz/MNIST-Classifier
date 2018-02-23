@@ -34,18 +34,21 @@ parser.add_argument("--img_path", help="Path to images to predict. []", type=str
 FLAGS = parser.parse_args()
 
 
-now = datetime.datetime.now(dateutil.tz.tzlocal())
-timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
+def create_log_dir():
+    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
 
-log_dir = FLAGS.log_dir+"/" + str(sys.argv[0][:-3]) + "_" + timestamp
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+    log_dir = FLAGS.log_dir+"/" + str(sys.argv[0][:-3]) + "_" + timestamp
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
 
-# save command line arguments
-with open(log_dir + "/hyperparameters_"+timestamp+".csv", "wb") as f:
-    for arg in FLAGS.__dict__:
-        f.write(arg + "," + str(FLAGS.__dict__[arg]) + "\n")
+    # save command line arguments
+    with open(log_dir + "/hyperparameters_"+timestamp+".csv", "wb") as f:
+        for arg in FLAGS.__dict__:
+            f.write(arg + "," + str(FLAGS.__dict__[arg]) + "\n")
+
+    return log_dir
 
 
 # use mnist data from the specified folder (download if not already there)
@@ -116,7 +119,7 @@ def build_model(optimizer, learning_rate, input_shape=(28, 28, 1)):
 
 
 # training the model
-def train_model():
+def train_model(log_dir):
     train_data, val_data, test_data = load_mnist_data(path=FLAGS.data_set_path, val_size=FLAGS.val_size)
 
     model = build_model(optimizer=FLAGS.optimizer, learning_rate=FLAGS.learning_rate)
@@ -161,7 +164,8 @@ def predict(model, img_path, batch_size):
 
 
 if FLAGS.train:
-    train_model()
+    log_dir = create_log_dir()
+    train_model(log_dir)
 elif FLAGS.predict:
     assert FLAGS.img_path is not None, "Please specify the directory in which the images are stored via \"--img_path\"."
     assert os.path.exists(FLAGS.img_path), "The specified path to the images does not exit: {}". \
