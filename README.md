@@ -1,5 +1,5 @@
 # MNIST-Classifier
-Pretrained classifier to classify MNIST images, based on Keras with the Tensorflow backend.
+Pretrained classifier (Convolutional Neural Network, CNN) to classify MNIST images, based on Keras with the Tensorflow backend.
 
 ### Requirements:
 * Keras 2.1.4
